@@ -90,27 +90,54 @@ int information(FILE*fp)//初始化代码并入栈。
 	temp = malloc(10000);
 	fseek(fp, 0, SEEK_SET);//定位 
 	fread(temp, sizeof(char), 10000, fp);
-	//处理产生式
+	//1.处理产生式
 	for (i = 0; i<1000; i++){
 		//跳出 
-		if (temp[i] == '10'){
+		if (temp[i-1] == 10){
 			break;
 		}
 		//未结束存入grammarElement gramOldSet[200];char terSymbol[200];char non_ter[200];
 		else{
+			printf("**");
 			for (t = 0; t < 10; t++) {
-
-
+				
+				if (temp[i] == 32|| temp[i] == 10) {
+					
+					g_num++;
+					j = t;
+					break;
+				}
+				gramOldSet[g_num].formula[t] = temp[i];
+				printf("%c", gramOldSet[g_num].formula[t] = temp[i]);
+				i++;
 
 			}
-			printf("%c==%d  ", temp[i], temp[i]);
-			j++;
-
+			printf("**\n");
 		}
-	}
-	fact = j;
+		//2.处理非终结符
+		/*for (; i<1000; i++) {
+			//跳出 
+			if (temp[i] == '10') {
+				break;
+			}
+			//未结束存入grammarElement gramOldSet[200];char terSymbol[200];char non_ter[200];
+			else {
+				for (t = 0; t < 10; t++) {
+					if (temp[i] == ' ') {
+						break;
+					}
+					gramOldSet[j].formula[t] = temp[i];
+					i++;
 
-	printf("%d\n", j);
+				}
+				printf("%c==%d  ", temp[i], temp[i]);
+				j++;
+
+			}*/
+	}
+	fact = g_num;
+
+	printf("%d\n", g_num);
 	return fact;
 }
 
