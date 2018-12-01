@@ -100,6 +100,8 @@ int information(FILE*fp)//初始化代码并入栈。
 		else{
 			for (t = 0; t < 10; t++) {
 
+
+
 			}
 			printf("%c==%d  ", temp[i], temp[i]);
 			j++;
