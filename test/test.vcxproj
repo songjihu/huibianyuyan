@@ -142,7 +142,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="M:\编译原理实验\3\input.txt" />
+    <Text Include="input.txt" />
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>

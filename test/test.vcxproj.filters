@@ -16,7 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
-    <Text Include="M:\编译原理实验\3\input.txt" />
+    <Text Include="input.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
