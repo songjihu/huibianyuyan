@@ -115,7 +115,7 @@ int information(FILE*fp)//初始化代码并入栈。
 			printf("**\n");
 		}
 		//2.处理非终结符
-		/*for (; i<1000; i++) {
+		for (i=0; i<1000; i++) {
 			//跳出 
 			if (temp[i] == '10') {
 				break;
@@ -133,7 +133,7 @@ int information(FILE*fp)//初始化代码并入栈。
 				printf("%c==%d  ", temp[i], temp[i]);
 				j++;
 
-			}*/
+			}
 	}
 	fact = g_num;
 
