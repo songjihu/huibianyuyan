@@ -137,7 +137,7 @@ int information(FILE*fp)//初始化代码并入栈。
 	}
 	fact = g_num;
 
-	printf("%d\n", g_num);
+	printf("HHHHH%d\n", g_num);
 	return fact;
 }
 
