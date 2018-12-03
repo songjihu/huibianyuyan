@@ -43,6 +43,7 @@ void pp(Stack *s, Stack *s1)
 int information(FILE*fp);//初始化代码并入栈。
 int pro_first(int i);//求first集 
 int pro_follow();//求follow集
+int cap(int t,int j);//求右部符号是否可以推出空字
 
 //关键字初值定义(32个) 
 char *rwtab[33] = { "auto"," short","int","long","float","double","char","struct",
@@ -300,8 +301,8 @@ int pro_first(int i)
 	firstSET[i][20] = 1;//在20位置记录是否已经求过first集
 	//i外层循环，t产生式循环，j产生式从左到右循环，flag是否为终结符标志，m终结符循环,n为first集中第几个,x为非终结符序号
 	int t=0,j=0,flag=0,m=0,n=0,x=0;
-	//p控制加入,
-	int p = 0;
+	//p控制加入,flag1控制产生式右部时候求完，flag2控制非终结符是否都可以推出易普逊
+	int p = 0,flag1=0,flag2=0;
 	//在所有产生式中查找non_ter[i]所在的产生式
 	for (t = 0; t < g_num; t++)
 	{
@@ -334,51 +335,64 @@ int pro_first(int i)
 				n++;
 				firstSET[i][21]++;//在21的位置记录长度
 			}
-			if (gramOldSet[t].formula[j] == '@')
+			else//否则为非终结符
 			{
-				firstSET[i][n] = '@';
-				n++;
-				firstSET[i][21]++;//在21的位置记录长度
-			}
-			//否则为非终结符
-			else
-			{
-				//查找当前非终结符序号x
-				for (x = 0; x < nt_num; x++)
+				flag1 = 0;
+				flag2 = 0;
+				while (flag1 != 1)//查找所有右端的非终结符的first集，直到终结符或者结束
 				{
-					if (gramOldSet[t].formula[j] == non_ter[x])
+					//查找当前非终结符序号x
+					for (x = 0; x < nt_num; x++)
+					{
+						if (gramOldSet[t].formula[j] == non_ter[x])
+						{
+							break;
+						}
+					}
+					if (x == nt_num)//若循环到终结符，则跳出
 					{
 						break;
 					}
-				}
-				//如果产生式右部的第一个符号等于当前字符
-				if (gramOldSet[t].formula[j] == non_ter[i])
-				{
-					//跳到下一产生式进行查找
-					continue;
-				}
-				//若当前非终结符还没有求其first集
-				if (firstSET[x][20] != 1)
-				{
-					//查找他的first集并标识此符号已求其first集
-					pro_first(x);
-					//将结果加入x的first集
-					for (p = 0; p < firstSET[x][21]; p++)
+					//若当前非终结符还没有求其first集
+					if (firstSET[x][20] != 1)
 					{
-						firstSET[i][n] = firstSET[x][p];
-						n++;
-						firstSET[i][21]++;
+						//查找他的first集并标识此符号已求其first集
+						pro_first(x);
+						//将结果加入x的first集
+						for (p = 0; p < firstSET[x][21]; p++)
+						{
+							if (firstSET[x][p] == '@')
+							{
+								flag2 = 1;//表示可以推到空集，需要求下一
+								firstSET[i][n] = firstSET[x][p];
+								n++;
+								firstSET[i][21]++;
+							}
+							firstSET[i][n] = firstSET[x][p];
+							n++;
+							firstSET[i][21]++;
+						}
 					}
+					else
+					{
+						for (p = 0; p < firstSET[x][21]; p++)
+						{
+							firstSET[i][n] = firstSET[x][p];
+							n++;
+							firstSET[i][21]++;
+						}
+					}
+
 				}
 			}
-            //若当前产生式右部符号可推出@（易普逊）且当前字符不是右部的最后一个字符
-			if ()
-			{
-
-			}
-
 		}
 	}
 	i++;
 	
 }
+
+int cap(int i, int j)
+{
+
+}
+
