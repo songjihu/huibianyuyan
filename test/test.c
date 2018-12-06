@@ -323,7 +323,7 @@ int pro_first()
 			{
 				gramOldSet[i + 100].formula[21] = 1;
 				//存入first集
-				for (t = 0; t < nt_num; t++)
+				/*for (t = 0; t < nt_num; t++)
 				{
 					if (gramOldSet[i + 100].formula[0] == non_ter[t])
 					{
@@ -331,7 +331,7 @@ int pro_first()
 						firstSET[t][20]++;
 						break;
 					}
-				}
+				}*/
 				break;
 			}
 			else
@@ -376,11 +376,21 @@ int pro_first()
 					gramOldSet[gg_num + 100].formula[1] = gramOldSet[i + 100].formula[1];
 					gramOldSet[gg_num + 100].formula[2] = gramOldSet[j + 100].formula[2];
 					gramOldSet[gg_num + 100].formula[21] = 0;
+					//计算21
 					for (t = 0; t < t_num; t++)
 					{
 						if (gramOldSet[gg_num + 100].formula[2] == terSymbol[t])
 						{
 							gramOldSet[gg_num + 100].formula[21] = 1;
+							break;
+						}
+					}
+					//计算22
+					for (t = 0; t < nt_num; t++)
+					{
+						if (gramOldSet[gg_num + 100].formula[0] == non_ter[t])
+						{
+							gramOldSet[gg_num + 100].formula[22] = t;
 							break;
 						}
 					}
@@ -392,11 +402,12 @@ int pro_first()
 		}
 		if (flag == 0 && i == gg_num - 1)
 		{
-			break;
 			printf("完成");
+			break;
 		}
 
 	}
+	printf("====%d %d %d====", flag, i,gg_num);
 	//打印
 	for (i = 0; i < gg_num; i++)
 	{
@@ -410,6 +421,26 @@ int pro_first()
 	//加入first集
 	for (i = 0; i < gg_num; i++)
 	{
+		for (j = 0; j < t_num; j++)
+		{
+			if (gramOldSet[i + 100].formula[2] == terSymbol[j])
+			{
+				printf("%d id=%d,%d\n",i, gramOldSet[i + 100].formula[22], firstSET[gramOldSet[i + 100].formula[22]][20]);
+				firstSET[gramOldSet[i + 100].formula[22]][firstSET[gramOldSet[i + 100].formula[22]][20]]= terSymbol[j];
+				firstSET[gramOldSet[i + 100].formula[22]][20]++;
 
+				break;
+			}
+		}
+	}
+	//打印
+	for (i = 0; i < nt_num; i++)
+	{
+		printf("%c:", non_ter[i]);
+		for (j = 0; j < firstSET[i][20]; j++)
+		{
+			printf("%c",firstSET[i][j]);
+		}
+		printf("   %d\n", firstSET[i][20]);
 	}
 }
