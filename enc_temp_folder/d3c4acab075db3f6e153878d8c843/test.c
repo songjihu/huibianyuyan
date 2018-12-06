@@ -407,9 +407,4 @@ int pro_first()
 		printf("\n");
 	
 	}
-	//º”»ÎfirstºØ
-	for (i = 0; i < gg_num; i++)
-	{
-
-	}
 }
