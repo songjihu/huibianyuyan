@@ -295,104 +295,87 @@ int information(FILE*fp)//初始化。
 	return fact;
 }
 
-int pro_first(int i)
+int pro_first()
 {
-	firstSET[i][21] = 0;//求之前长度为0
-	firstSET[i][20] = 1;//在20位置记录是否已经求过first集
-	//i外层循环，t产生式循环，j产生式从左到右循环，flag是否为终结符标志，m终结符循环,n为first集中第几个,x为非终结符序号
-	int t=0,j=0,flag=0,m=0,n=0,x=0;
-	//p控制加入,flag1控制产生式右部时候求完，flag2控制非终结符是否都可以推出易普逊
-	int p = 0,flag1=0,flag2=0;
-	//在所有产生式中查找non_ter[i]所在的产生式
-	for (t = 0; t < g_num; t++)
+	int i,j,t;
+	int k = 0;//k记录推导式子的个数
+	//初始化每一个非终结符first集的长度
+	for (i = 0; i < nt_num; i++)
 	{
-		//若找到
-		j = 0;
-		if (non_ter[i] == gramOldSet[t].formula[j])
+		firstSET[i][20] = 0;
+	}
+	//复制所有产生式前三位（存到100开始的位置）
+	for (i = 0; i < g_num; i++)
+	{
+		k++;
+		for (j = 0; j < 3; j++)
 		{
-			//移动至箭头右方
-			while (gramOldSet[t].formula[j] != '>')
+			gramOldSet[i + 100].formula[j] = gramOldSet[i].formula[j];
+			
+		}
+		//20记录产生式长度
+		gramOldSet[i + 100].formula[20] = 3;
+		//21记录是否为终结符开头
+		for (j = 0; j < t_num; j++)
+		{
+			if (gramOldSet[i + 100].formula[2] == terSymbol[j])
 			{
-				j++;
-			}
-			j++;
-			//如果产生式右部第一个字符为终结符或为空
-			m = 0;
-			flag = 0;
-			while (m < t_num)
-			{
-				if (gramOldSet[t].formula[j] == terSymbol[m])
+				gramOldSet[i + 100].formula[21] = 1;
+				//存入first集
+				for (t = 0; t < nt_num; t++)
 				{
-					flag = 1;
-					break;
-				}
-				m++;
-			}
-			//加入 终结符 或 易普逊
-			if (flag == 1)
-			{
-				firstSET[i][n] = terSymbol[m];
-				n++;
-				firstSET[i][21]++;//在21的位置记录长度
-			}
-			else//否则为非终结符
-			{
-				flag1 = 0;
-				flag2 = 0;
-				while (flag1 != 1)//查找所有右端的非终结符的first集，直到终结符或者结束
-				{
-					//查找当前非终结符序号x
-					for (x = 0; x < nt_num; x++)
+					if (gramOldSet[i + 100].formula[0] == non_ter[t])
 					{
-						if (gramOldSet[t].formula[j] == non_ter[x])
-						{
-							break;
-						}
-					}
-					if (x == nt_num)//若循环到终结符，则跳出
-					{
+						firstSET[t][firstSET[t][20]] = terSymbol[j];
+						firstSET[t][20]++;
 						break;
 					}
-					//若当前非终结符还没有求其first集
-					if (firstSET[x][20] != 1)
-					{
-						//查找他的first集并标识此符号已求其first集
-						pro_first(x);
-						//将结果加入x的first集
-						for (p = 0; p < firstSET[x][21]; p++)
-						{
-							if (firstSET[x][p] == '@')
-							{
-								flag2 = 1;//表示可以推到空集，需要求下一
-								firstSET[i][n] = firstSET[x][p];
-								n++;
-								firstSET[i][21]++;
-							}
-							firstSET[i][n] = firstSET[x][p];
-							n++;
-							firstSET[i][21]++;
-						}
-					}
-					else
-					{
-						for (p = 0; p < firstSET[x][21]; p++)
-						{
-							firstSET[i][n] = firstSET[x][p];
-							n++;
-							firstSET[i][21]++;
-						}
-					}
-
 				}
+				break;
+			}
+			else
+			{
+				gramOldSet[i + 100].formula[21] = 0;
+			}
+		}
+		//22记录产生式左端的符号id
+		for (j = 0; j < nt_num; j++)
+		{
+			if (gramOldSet[i + 100].formula[0] == non_ter[j])
+			{
+				gramOldSet[i + 100].formula[22] = j;
+				break;
+			}
+		}
+
+
+	}
+	//计算产生式右边第二位
+	for (i = 0; i < g_num; i++)
+	{
+		//若开头是非终结符，则将这个非终结符的first集加入
+		if (gramOldSet[i + 100].formula[21] == 0)
+		{
+			//查询first集并存入
+			for (j = 0; j < nt_num; j++)
+			{
+				if (gramOldSet[i + 100].formula[2] == non_ter[j])
+				{
+					for (t = 0; t < firstSET[j][20]; t++)
+					{
+						//gramOldSet[i + 100].formula[22]为左侧id
+						firstSET[gramOldSet[i + 100].formula[22]][gramOldSet[i + 100].formula[20]] = firstSET[j][t];
+						gramOldSet[i + 100].formula[20]++;
+					}
+					break;
+				} 
 			}
 		}
 	}
-	i++;
-	
 }
 
 int cap(int i, int j)
 {
 
-}
+} 
 
