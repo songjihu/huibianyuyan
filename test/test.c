@@ -26,6 +26,7 @@ char firstSET[100][100]; //各产生式的右部FIRST集
 char followSET[100][100];//各产生式的右部FOLLOW集 
 
 int g_num = 0, t_num = 0, nt_num = 0;//3种要存入的个数,最后一个内容有重复
+int zh = 50;//从firstSET[50]开始记录
 
 int M[200][200];         //分析表 
 
@@ -42,6 +43,7 @@ void pp(Stack *s, Stack *s1)
 
 int information(FILE*fp);//初始化代码并入栈。
 int pro_first();//求first集 
+int pro_first1(int a[10],int length);//求组合的first集
 int pro_follow();//求follow集
 
 //关键字初值定义(32个) 
@@ -77,6 +79,8 @@ int main()
 	//2.扫描输入文法 
 	fact = information(fp);//读取文件信息，并用字符数组对文件信息进行储存。
 	pro_first();
+	int a[10] = { 1,1,3,4 };
+	pro_first1(a, 4);
 	system("pause");
 	return 0;
 }
@@ -407,11 +411,11 @@ int pro_first()
 		}
 
 	}
-	printf("====%d %d %d====", flag, i,gg_num);
+	printf("====%d %d %d====\n", flag, i,gg_num);
 	//打印
 	for (i = 0; i < gg_num; i++)
 	{
-		for (j = 0; j < 3; j++) 
+		for (j = 0; j < 3; j++)
 		{
 			printf("%c", gramOldSet[i + 100].formula[j]);
 		}
@@ -443,4 +447,76 @@ int pro_first()
 		}
 		printf("   %d\n", firstSET[i][20]);
 	}
+}
+
+int pro_first1(int a[10],int length)
+{
+	//a[i]为非终结符id
+	zh++;
+	//赋初始值
+	firstSET[zh][20] = 0;
+	int i,j,t;
+	int b[12];//记录a[i]是否取得到易普逊
+	for (i = 0; i < 10; i++)
+	{
+		b[i] = 0;
+	}
+	for (i=0;i<length;i++)
+	{
+		//加入a[i]的first集
+		for (j = 0; j < firstSET[a[i]][20]; j++)
+		{
+			//查询是否可以推出易普逊
+			
+			if (firstSET[a[i]][j] != '@')
+			{
+				for (t = 0; t < firstSET[zh][20]; t++)
+				{
+					if (firstSET[a[i]][j] == firstSET[zh][t])
+					{
+						break;
+					}
+				}
+				if (t == firstSET[zh][20])
+				{
+					firstSET[zh][firstSET[zh][20]] = firstSET[a[i]][j];
+					firstSET[zh][20]++;
+				}
+			}
+			//跳过易普逊
+			else
+			{
+				b[i] = 1;
+				;
+			}
+			
+		}
+		//若前一个非终结符不能推出易普逊，则不必再向后推导
+		if (b[i] == 0)
+		{
+			i++;
+			break;
+		}
+	}
+	printf("\n%d\n", i);
+	//若全部可以推出易普逊，则加入易普逊
+	
+	if (b[i-1] == 1)
+	{
+		
+		firstSET[zh][firstSET[zh][20]] = '@';
+		firstSET[zh][20]++;
+	}
+	//打印
+	for (i = 0; i < length; i++)
+	{
+		printf("%c", non_ter[a[i]]);
+	}
+	printf(":");
+	for (i = 0; i < firstSET[zh][20]; i++)
+	{
+		printf("%c", firstSET[zh][i]);
+	}
+	printf(" %d\n", firstSET[zh][20]);
+	return zh;
 }
