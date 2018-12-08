@@ -22,12 +22,13 @@ grammarElement gramOldSet[200];//原始文法的产生式集
 char terSymbol[200];     //终结符号 
 char non_ter[200];       //非终结符
 char allSymbol[400];     //所有符号
-char firstSET[100][100]; //各产生式的右部FIRST集
-char followSET[100][100];//各产生式的右部FOLLOW集 
+char firstSET[200][100]; //各产生式的右部FIRST集
+char followSET[200][100];//各产生式的右部FOLLOW集 
 
 int g_num = 0, t_num = 0, nt_num = 0;//3种要存入的个数,最后一个内容有重复
 int gg_num;//推导式个数
 int zh = 50;//从firstSET[50]开始记录
+int zh1 = 100;//从firstSET[100]开始记录
 
 int M[200][200];         //分析表 
 
@@ -35,10 +36,11 @@ int M[200][200];         //分析表
 int information(FILE*fp);//初始化代码并入栈。
 int pro_first();//求first集 
 int pro_first1(int a[10],int length);//求非终结符组合的first集
-int pro_first2(char a[10], int length);//求混合的first集
+int pro_first2(int a[10],int length);//求混合的first集（终结符输入字符ascii，非终结符输入id）
 int pro_follow();//求follow集
 int isT(int x);//是否为终结符
 int isN(int x);//是否为非终结符
+int build_f();//构建分析表M[200][200]
 
 int isT(int x)
 {
@@ -80,18 +82,6 @@ void pp()
 	}
 }
 
-//关键字初值定义(32个) 
-char *rwtab[33] = { "auto"," short","int","long","float","double","char","struct",
-"union","enum","typedef","const","unsigned","signed","extern",
-"register","static","volatile","void","if","else","switch","case",
-"for","do","while","goto","continue","break","default","sizeof","return" };
-//界符(37个)
-char *delimiters[50] = { "*","/",":",":=","<","<>","<=",">",">=","=",";","(",")","#","-","+","++","--",
-"[","]","{","}","&","\"","'","==","%",".","||","&&","->","\,","!=","+=","-=","*","\\" };
-
-//NUM和ID
-char *ni[3] = { "1","a" };
-//引号里的内容
 
 int main()
 {
@@ -114,6 +104,7 @@ int main()
 	fact = information(fp);//读取文件信息，并用字符数组对文件信息进行储存。
 	pro_first();
 	pro_follow();
+	build_f();
 	system("pause");
 	return 0;
 }
@@ -842,7 +833,188 @@ int pro_follow()
 
 }
 
-int pro_first2(char a[10], int length)
+int pro_first2(int a[10], int length)
 {
+	//初始化存储位置
+	zh1++;
+	//赋初始值
+	firstSET[zh1][20] = 0;
+	int i,j;
+	for (i = 0; i < length; i++)
+	{
+		//若检测到终结符
+		if (isT(a[i]) != -1)
+		{
+			//若之前可以推出易普逊则加入终结符
+			if (firstSET[zh1][20] > 0)
+			{
+				if (firstSET[zh1][firstSET[zh1][20] - 1] == '@')
+				{
+					
+					//检测加入first集
+					for (j = 0; j < firstSET[zh1][20]; j++)
+					{
+						if (firstSET[zh1][j] == terSymbol[isT(a[i])])
+						{
+							j = 1000;
+							break;
+						}
+					}
 
+					if (j != 1000)
+					{
+						firstSET[zh1][firstSET[zh1][20]-1] = terSymbol[isT(a[i])];
+						
+					}
+					//end
+					return zh1;
+				}
+			}
+			else
+			{
+				//若第一个为终结符
+				if (firstSET[zh1][20] == 0)
+				{
+					firstSET[zh1][0] = terSymbol[isT(a[i])];
+					firstSET[zh1][20]++;
+				}
+				return zh1;
+			}
+			
+		}
+		else
+		{
+			//调用first1函数求first集
+			zh1 = pro_first1(a, (i + 1));
+		}
+	}
+}
+
+int build_f()
+{
+	int i, j, m;
+	int x, y;
+	int a[12], length, w=0;
+	int fir;// first集return值
+	int fol;//follow集return值
+	/*      x   终结符0    终结符1   终结符2   终结符3  ... （不含易普逊）
+	    y
+	非终结符0   产生式
+	非终结符1   产生式
+	非终结符2   报错
+	非终结符3   产生式
+	...
+	*/
+	//初始化M[][]
+	for (i = 0; i < 100; i++)
+	{
+		for (j = 0; j < 100; j++)
+		{
+			M[i][j] = -1;
+		}
+	}
+	//遍历规则
+	for (i = 0; i < g_num; i++)
+	{
+		//确定y位置
+		y = isN(gramOldSet[i].formula[0]);
+		//若右端不为易普逊，求右端first集
+		if (gramOldSet[i].formula[2] != '@')
+		{
+			//初始化
+			length = 0;
+			fir = 0;
+			for (j = 0; j < 11; j++)
+			{
+				a[10] = 0;
+			}
+			//加入右端到a[]
+			for (j = 2; j < gramOldSet[i].formula[20]; j++)
+			{
+				//若是终结符
+				if (isT(gramOldSet[i].formula[j]) != -1)
+				{
+					a[j - 2] = gramOldSet[i].formula[j];
+					length++;
+				}
+				//若是非终结符
+				else
+				{
+					a[j - 2] = isN(gramOldSet[i].formula[j]);
+					length++;
+				}
+			}
+			//求first集
+			fir = pro_first2(a, length);
+			/*for (j = 0; j < firstSET[fir][20]; j++)
+			{
+				printf("%c", firstSET[fir][j]);
+			}
+			printf("   %d\n", firstSET[fir][20]);*/
+			//加入到M表
+			for (j = 0; j < firstSET[fir][20]; j++)
+			{
+				//求的x坐标
+				x = isT(firstSET[fir][j]);
+				//以x，y位置加入产生式id
+				M[x][y] = i;
+				/*printf("加入[%d][%d]", x, y);
+				for (m = 0; m < gramOldSet[i].formula[20]; m++)
+				{
+					printf("%c", gramOldSet[i].formula[m]);
+				}
+				printf("\n");*/
+			}
+		}
+		//若为易普逊，求左端follow集
+		else
+		{
+			//加入到M表
+			for (j = 0; j < followSET[isN(gramOldSet[i].formula[0])][20]; j++)
+			{
+				//求的x坐标
+				x = isT(followSET[isN(gramOldSet[i].formula[0])][j]);
+				//以x，y位置加入产生式id
+				M[x][y] = i;
+				/*printf("加入[%d][%d]", x, y);
+				for (m = 0; m < gramOldSet[i].formula[20]; m++)
+				{
+					printf("%c", gramOldSet[i].formula[m]);
+				}
+				printf("\n");*/
+			}
+		}
+		//完成后继续循环
+		
+	}
+	//打印
+	for (i = 0; i < t_num; i++)
+	{ 
+		printf("   %c   ", terSymbol[i]);
+	}
+	printf("\n");
+	for (i = 0; i < nt_num; i++)
+	{
+		printf("%c  ", non_ter[i]);
+		for (j = 0; j < t_num; j++)
+		{
+			if (M[j][i] != -1)
+			{
+				//printf("[%d][%d]", j, i);
+				for (m = 0; m < gramOldSet[M[j][i]].formula[20]; m++)
+				{
+					printf("%c", gramOldSet[M[j][i]].formula[m]);
+				}
+			}
+			else
+			{
+				printf("    ");
+			}
+			
+				printf("   ");
+			
+			
+		}
+		printf("\n");
+	}
 }
