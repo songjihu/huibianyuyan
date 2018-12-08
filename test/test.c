@@ -34,7 +34,8 @@ int M[200][200];         //分析表
 
 int information(FILE*fp);//初始化代码并入栈。
 int pro_first();//求first集 
-int pro_first1(int a[10],int length);//求组合的first集
+int pro_first1(int a[10],int length);//求非终结符组合的first集
+int pro_first2(char a[10], int length);//求混合的first集
 int pro_follow();//求follow集
 int isT(int x);//是否为终结符
 int isN(int x);//是否为非终结符
@@ -63,6 +64,20 @@ int isN(int x)
 		}
 	}
 	return -1;
+}
+//打印
+void pp()
+{
+	int o, p;
+	for (o = 0; o < nt_num; o++)
+	{
+		printf("%c:", non_ter[o]);
+		for (p = 0; p < followSET[o][20]; p++)
+		{
+			printf("%c", followSET[o][p]);
+		}
+		printf("   %d\n", followSET[o][20]);
+	}
 }
 
 //关键字初值定义(32个) 
@@ -600,15 +615,7 @@ int pro_follow()
 								followSET[isN(gramOldSet[i].formula[j])][followSET[isN(gramOldSet[i].formula[j])][20]] = terSymbol[isT(gramOldSet[i].formula[t])];
 								followSET[isN(gramOldSet[i].formula[j])][20]++;
 								//打印
-								for (o = 0; o < nt_num; o++)
-								{
-									printf("0%c:", non_ter[o]);
-									for (p = 0; p < followSET[o][20]; p++)
-									{
-										printf("%c", followSET[o][p]);
-									}
-									printf("   %d\n", followSET[o][20]);
-								}
+								//pp();
 							}
 
 							//右部坐标后移到终结符之后
@@ -637,15 +644,7 @@ int pro_follow()
 									followSET[isN(gramOldSet[i].formula[j])][followSET[isN(gramOldSet[i].formula[j])][20]] = firstSET[k][m];
 									followSET[isN(gramOldSet[i].formula[j])][20]++;
 									//打印
-									for (o = 0; o < nt_num; o++)
-									{
-										printf("1%c:", non_ter[o]);
-										for (p = 0; p < followSET[o][20]; p++)
-										{
-											printf("%c", followSET[o][p]);
-										}
-										printf("   %d\n", followSET[o][20]);
-									}
+									//pp();
 								}
 
 							}
@@ -668,15 +667,7 @@ int pro_follow()
 									followSET[isN(gramOldSet[i].formula[j])][followSET[isN(gramOldSet[i].formula[j])][20]] = terSymbol[isT(gramOldSet[i].formula[t])];
 									followSET[isN(gramOldSet[i].formula[j])][20]++;
 									//打印
-									for (o = 0; o < nt_num; o++)
-									{
-										printf("2%c:", non_ter[o]);
-										for (p = 0; p < followSET[o][20]; p++)
-										{
-											printf("%c", followSET[o][p]);
-										}
-										printf("   %d\n", followSET[o][20]);
-									}
+									//pp();
 								}
 							}
 							//加入后清零a[]
@@ -721,15 +712,7 @@ int pro_follow()
 								followSET[isN(gramOldSet[i].formula[j])][followSET[isN(gramOldSet[i].formula[j])][20]] = firstSET[k][m];
 								followSET[isN(gramOldSet[i].formula[j])][20]++;
 								//打印
-								for (o = 0; o < nt_num; o++)
-								{
-									printf("3%c:", non_ter[o]);
-									for (p = 0; p < followSET[o][20]; p++)
-									{
-										printf("%c", followSET[o][p]);
-									}
-									printf("   %d\n", followSET[o][20]);
-								}
+								//pp();
 							}
 
 						}
@@ -754,24 +737,27 @@ int pro_follow()
 		{
 			a[j] = 0;
 		}
-		//从右到左遍历右部验证是否可以将左部的follow集加入follow集
+		//从右到左遍历右部验证是否可以将左部的follow集加入follow集（error）
 		for (j = gramOldSet[i].formula[20] - 1; j > 1; j--)
 		{
+			//printf("_____i=%d,j=%d\n",i, j);
 			//如果是非终结符，计算是否可以推出易普逊
 			if (isN(gramOldSet[i].formula[j])!=-1)
 			{
+				//printf("//%d:是非终结符%c，计算是否可以推出易普逊\n",i,non_ter[isN(gramOldSet[i].formula[j])]);
 				//查询所有推导
 				for (t = 0; t < gg_num; t++)
 				{
-					if (gramOldSet[t + 100].formula[0] == isN(gramOldSet[i].formula[j]) && gramOldSet[t + 100].formula[2] == '@')
+					if (gramOldSet[t + 100].formula[0] == non_ter[isN(gramOldSet[i].formula[j])] && gramOldSet[t + 100].formula[2] == '@')
 					{
 						t = 1000;
 						break;
 					}
 				}
-				//若不能推出易普逊，则把左部的follow赋给他
+				//若不能推出易普逊，赋予follow集后则终止
 				if (t != 1000)
 				{
+					//printf("//%d:非终结符%c，不可以推出易普逊\n",i,non_ter[isN(gramOldSet[i].formula[j])]);
 					for (m = 0; m < followSET[isN(gramOldSet[i].formula[0])][20]; m++)
 					{
 						//先查重
@@ -790,22 +776,42 @@ int pro_follow()
 							followSET[isN(gramOldSet[i].formula[j])][followSET[isN(gramOldSet[i].formula[j])][20]] = followSET[isN(gramOldSet[i].formula[0])][m];
 							followSET[isN(gramOldSet[i].formula[j])][20]++;
 							//打印
-							for (o = 0; o < nt_num; o++)
-							{
-								printf("5%c:", non_ter[o]);
-								for (p = 0; p < followSET[o][20]; p++)
-								{
-									printf("%c", followSET[o][p]);
-								}
-								printf("   %d\n", followSET[o][20]);
-							}
+							//pp();
 						}
 
 					}
-
+					break;
+					
 				}
-				//若能则继续向左
+				//若能则赋予follow集，继续向左
+				else
+				{
+					//printf("//%d:非终结符%c，可以推出易普逊\n",i, non_ter[isN(gramOldSet[i].formula[j])]);
+					for (m = 0; m < followSET[isN(gramOldSet[i].formula[0])][20]; m++)
+					{
+						//先查重
+						for (n = 0; n < followSET[isN(gramOldSet[i].formula[j])][20]; n++)
+						{
+							if (followSET[isN(gramOldSet[i].formula[j])][n] == followSET[isN(gramOldSet[i].formula[0])][m]
+								|| followSET[isN(gramOldSet[i].formula[0])][m] == '@')
+							{
+								n = 1000;
+								break;
+							}
+						}
+						if (n != 1000)
+						{
+							flag = 1;
+							followSET[isN(gramOldSet[i].formula[j])][followSET[isN(gramOldSet[i].formula[j])][20]] = followSET[isN(gramOldSet[i].formula[0])][m];
+							followSET[isN(gramOldSet[i].formula[j])][20]++;
+							//打印
+							//pp();
+						}
 
+					}
+						
+					
+				}
 			}
 			//遇到终结符则跳出
 			else
@@ -823,23 +829,20 @@ int pro_follow()
 		//不能跳出则继续重复循环
 		if (i == (g_num - 1))
 		{
-			i = 0;
+			i = -1;
 			flag = 0;
 		}
-		printf("\n%d\n", i);
-		for (o = 0; o < nt_num; o++)
-		{
-			printf("%c:", non_ter[o]);
-			for (p = 0; p < followSET[o][20]; p++)
-			{
-				printf("%c", followSET[o][p]);
-			}
-			printf("   %d\n", followSET[o][20]);
-		}
+		//("\n%d\n", i);
+		//pp();
 		
 	}
 	//打印
-	
+	pp();
 
+
+}
+
+int pro_first2(char a[10], int length)
+{
 
 }
