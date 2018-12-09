@@ -29,7 +29,7 @@ int zh = 50;//从firstSET[50]开始记录
 int zh1 = 100;//从firstSET[100]开始记录
 
 int M[200][200];         //分析表 
-
+int MM[200][200];        //打印表
 
 int information(FILE*fp);//初始化代码并入栈。
 int pro_first();//求first集 
@@ -79,6 +79,19 @@ void pp()
 		}
 		printf("   %d\n", followSET[o][20]);
 	}
+}
+//打印栈的内容
+void ppp(Stack *s)
+{
+	Node *test_node;
+	while (s->count > 0)
+	{
+		
+		test_node = pop(s);
+		printf("%c", gramOldSet[test_node->data].formula[0]);
+		//printf("s->count=%d  test_node->data=%d\n", s->count, test_node->data);
+	}
+	printf("******\n");
 }
 
 
@@ -1023,7 +1036,23 @@ int build_k(Stack *s)
 {
 	int i, j, t, m, n;
 	int left, right;
+	int rr,rr1;
+	int count[100];//记录栈中的符号来源
+	count[40] = 0;//40位置存放长度
+	//初始化count
+	for (i = 0; i < 30; i++)
+	{
+		count[i] = -1;
+	}
 	Node *test_node;
+	//初始化打印表MM
+	for (i = 0; i < 100; i++)
+	{
+		for (j = 0; j < 100; j++)
+		{
+			MM[i][j] = -1;
+		}
+	}
 	char input[22];//接受输入串，并在20的位置当前记录长度，19的位置记录初始长度
 	printf("请输入分析串(以#结束):\n");
 	for (i = 0; i < 15; i++)
@@ -1053,7 +1082,7 @@ int build_k(Stack *s)
 	while (input[20] != 0)
 	{
 		//取栈顶与input最左端(input[19]-input[20])对比并查询M表
-		test_node = pop(s);
+		test_node = get_top_stack(s);
 		left = test_node->data;
 		right = input[input[19] - input[20]];
 		//如果是栈顶是终结符
@@ -1062,8 +1091,10 @@ int build_k(Stack *s)
 			//匹配右端
 			if (left == right)
 			{
+				
 				input[20]--;
-				continue;
+				pop(s);
+				
 			}
 			else
 			{
@@ -1071,36 +1102,52 @@ int build_k(Stack *s)
 				break;
 			}
 		}
-		//若是非终结符则查询M[T][NT]
-		if (M[isT(right)][isN(left)] != -1)
-		{
-			//打印
-			for (m = 0; m < gramOldSet[M[isT(right)][isN(left)]].formula[20]; m++)
-			{
-				printf("%c", gramOldSet[M[isT(right)][isN(left)]].formula[m]);
-			}
-			printf("\n");
-			//易普逊则继续
-			if (gramOldSet[M[isT(right)][isN(left)]].formula[m - 1] == '@')
-			{
-				continue;
-			}
-			//非终结符进栈
-			else
-			{
-				for (m = gramOldSet[M[isT(right)][isN(left)]].formula[20] - 1; m > 1; m--)
-				{
-					push(gramOldSet[M[isT(right)][isN(left)]].formula[m], s);
-				}
-			}
-			
-		}
-		//如果查询不到，报错并跳出
 		else
 		{
-			printf("ERROR\n");
-			break;
+			//若是非终结符则查询M[T][NT]
+			if (M[isT(right)][isN(left)] != -1)
+			{
+				//用到的产生式保存到count[]
+				count[count[40]] = M[isT(right)][isN(left)];
+				count[40]++;
+				//打印
+				for (m = 0; m < gramOldSet[M[isT(right)][isN(left)]].formula[20]; m++)
+				{
+
+					printf("%c", gramOldSet[M[isT(right)][isN(left)]].formula[m]);
+				}
+				printf("\n");
+
+				//易普逊则继续
+				if (gramOldSet[M[isT(right)][isN(left)]].formula[m - 1] == '@')
+				{
+					pop(s);
+					
+				}
+				//非终结符进栈
+				else
+				{
+					pop(s);
+					
+					
+					for (m = gramOldSet[M[isT(right)][isN(left)]].formula[20] - 1; m > 1; m--)
+					{
+						push(gramOldSet[M[isT(right)][isN(left)]].formula[m], s);
+
+					}
+
+				}
+				//pop(s);
+
+			}
+			//如果查询不到，报错并跳出
+			else
+			{
+				printf("ERROR\n");
+				break;
+			}
 		}
+		
 	}
 	
 
