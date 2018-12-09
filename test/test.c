@@ -81,17 +81,19 @@ void pp()
 	}
 }
 //打印栈的内容
-void ppp(Stack *s)
+void ppp(int a[100])
 {
-	Node *test_node;
-	while (s->count > 0)
+	int i;
+	for (i = 0; i < a[40]; i++)
 	{
 		
-		test_node = pop(s);
-		printf("%c", gramOldSet[test_node->data].formula[0]);
-		//printf("s->count=%d  test_node->data=%d\n", s->count, test_node->data);
+		if (gramOldSet[a[i]].formula[0] == gramOldSet[a[i + 1]].formula[0])
+		{
+			continue;
+		}
+		printf("%c", gramOldSet[a[i]].formula[0]);
 	}
-	printf("******\n");
+	printf("\n");
 }
 
 
@@ -1038,12 +1040,13 @@ int build_k(Stack *s)
 	int left, right;
 	int rr,rr1;
 	int count[100];//记录栈中的符号来源
-	count[40] = 0;//40位置存放长度
+	count[40] = 2;//40位置存放长度
 	//初始化count
 	for (i = 0; i < 30; i++)
 	{
 		count[i] = -1;
 	}
+	count[0] = 0;
 	Node *test_node;
 	//初始化打印表MM
 	for (i = 0; i < 100; i++)
@@ -1091,9 +1094,18 @@ int build_k(Stack *s)
 			//匹配右端
 			if (left == right)
 			{
-				
+				ppp(count);
+				printf("**** %c ****\n", left);
+				if (left == '#')
+				{
+					break;
+				}
 				input[20]--;
 				pop(s);
+				
+				count[40]--;
+				count[count[40]] = -1;
+				printf("1s->count=%d,count[40]=%d\n", s->count, count[40]);
 				
 			}
 			else
@@ -1107,9 +1119,6 @@ int build_k(Stack *s)
 			//若是非终结符则查询M[T][NT]
 			if (M[isT(right)][isN(left)] != -1)
 			{
-				//用到的产生式保存到count[]
-				count[count[40]] = M[isT(right)][isN(left)];
-				count[40]++;
 				//打印
 				for (m = 0; m < gramOldSet[M[isT(right)][isN(left)]].formula[20]; m++)
 				{
@@ -1121,19 +1130,29 @@ int build_k(Stack *s)
 				//易普逊则继续
 				if (gramOldSet[M[isT(right)][isN(left)]].formula[m - 1] == '@')
 				{
+					ppp(count);
 					pop(s);
 					
+					count[40]--;
+					count[count[40]] = -1;
+					printf("2s->count=%d,count[40]=%d\n", s->count, count[40]);
 				}
 				//非终结符进栈
 				else
 				{
+					ppp(count);
 					pop(s);
 					
+					count[40]--;
+					count[count[40]] = -1;
+					printf("3s->count=%d,count[40]=%d\n", s->count, count[40]);
 					
 					for (m = gramOldSet[M[isT(right)][isN(left)]].formula[20] - 1; m > 1; m--)
 					{
 						push(gramOldSet[M[isT(right)][isN(left)]].formula[m], s);
-
+						count[count[40]] = M[isT(right)][isN(left)];
+						count[40]++;
+						printf("666 s->count=%d,count[40]=%d\n", s->count, count[40]);
 					}
 
 				}
