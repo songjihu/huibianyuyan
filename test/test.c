@@ -1,5 +1,3 @@
-// test.cpp : ¶¨Òå¿ØÖÆÌ¨Ó¦ÓÃ³ÌĞòµÄÈë¿Úµã¡£
-//
 
 #include "stdafx.h"
 #include"sjh2.h" 
@@ -40,7 +38,8 @@ int pro_first2(int a[10],int length);//Çó»ìºÏµÄfirst¼¯£¨ÖÕ½á·ûÊäÈë×Ö·ûascii£¬·ÇÖ
 int pro_follow();//Çófollow¼¯
 int isT(int x);//ÊÇ·ñÎªÖÕ½á·û
 int isN(int x);//ÊÇ·ñÎª·ÇÖÕ½á·û
-int build_f();//¹¹½¨·ÖÎö±íM[200][200]
+int build_f();//¹¹½¨·ÖÎö±íM[200][200] 
+int build_k(Stack *s);//¹¹½¨¿ØÖÆ³ÌĞò
 
 int isT(int x)
 {
@@ -105,6 +104,7 @@ int main()
 	pro_first();
 	pro_follow();
 	build_f();
+	build_k(&s);
 	system("pause");
 	return 0;
 }
@@ -1017,4 +1017,91 @@ int build_f()
 		}
 		printf("\n");
 	}
+}
+
+int build_k(Stack *s)
+{
+	int i, j, t, m, n;
+	int left, right;
+	Node *test_node;
+	char input[22];//½ÓÊÜÊäÈë´®£¬²¢ÔÚ20µÄÎ»ÖÃµ±Ç°¼ÇÂ¼³¤¶È£¬19µÄÎ»ÖÃ¼ÇÂ¼³õÊ¼³¤¶È
+	printf("ÇëÊäÈë·ÖÎö´®(ÒÔ#½áÊø):\n");
+	for (i = 0; i < 15; i++)
+	{
+		scanf("%c", &input[i]);
+		if (input[i] == '#')
+		{
+			break;
+		}
+	}
+	input[20] = i+1;
+	input[19] = input[20];//Ô­Ê¼³¤¶È
+	printf("ÊäÈëÍê³É!³¤¶ÈÎª%d\n",input[20]);
+	for (i = 0; i < 15; i++)
+	{
+		printf("%c",input[i]);
+		if (input[i] == '#')
+		{
+			printf("\n");
+			break;
+		}
+	}
+	//½øÕ»#ºÍ¿ªÊ¼·û
+	push('#', s);
+	push(gramOldSet[0].formula[0], s);
+	//¿ªÊ¼Ñ­»·
+	while (input[20] != 0)
+	{
+		//È¡Õ»¶¥Óëinput×î×ó¶Ë(input[19]-input[20])¶Ô±È²¢²éÑ¯M±í
+		test_node = pop(s);
+		left = test_node->data;
+		right = input[input[19] - input[20]];
+		//Èç¹ûÊÇÕ»¶¥ÊÇÖÕ½á·û
+		if (isT(left) != -1)
+		{
+			//Æ¥ÅäÓÒ¶Ë
+			if (left == right)
+			{
+				input[20]--;
+				continue;
+			}
+			else
+			{
+				printf("ERROR\n");
+				break;
+			}
+		}
+		//ÈôÊÇ·ÇÖÕ½á·ûÔò²éÑ¯M[T][NT]
+		if (M[isT(right)][isN(left)] != -1)
+		{
+			//´òÓ¡
+			for (m = 0; m < gramOldSet[M[isT(right)][isN(left)]].formula[20]; m++)
+			{
+				printf("%c", gramOldSet[M[isT(right)][isN(left)]].formula[m]);
+			}
+			printf("\n");
+			//Ò×ÆÕÑ·Ôò¼ÌĞø
+			if (gramOldSet[M[isT(right)][isN(left)]].formula[m - 1] == '@')
+			{
+				continue;
+			}
+			//·ÇÖÕ½á·û½øÕ»
+			else
+			{
+				for (m = gramOldSet[M[isT(right)][isN(left)]].formula[20] - 1; m > 1; m--)
+				{
+					push(gramOldSet[M[isT(right)][isN(left)]].formula[m], s);
+				}
+			}
+			
+		}
+		//Èç¹û²éÑ¯²»µ½£¬±¨´í²¢Ìø³ö
+		else
+		{
+			printf("ERROR\n");
+			break;
+		}
+	}
+	
+
 }
